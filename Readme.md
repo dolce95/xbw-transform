@@ -1,5 +1,7 @@
 # XBWT
 
+[![PyPI version](https://badge.fury.io/py/xbwt.svg)](https://pypi.org/project/xbwt/)
+
 This package allows to compute the xbwt transform. The following link refers to the article in which it was defined: https://www.semanticscholar.org/paper/Compressing-and-indexing-labeled-trees%2C-with-Ferragina-Luccio/8c4f49913e8db00dc09c31af480bf4dc37a853d9.
 
 ## Installation
