@@ -382,7 +382,7 @@ class XBWT(object):
         """
         self.T = T
     
-    def computeIntNodeAPosFirstSortrray(self, root):
+    def computeIntNodesArray(self, root):
         """
         Compute the IntNodes Array needed by the PathSort algorithm
 
@@ -556,7 +556,7 @@ class XBWT(object):
                 a[i] = aux[i]
         return a
     
-    def nameTriplets(self, SortedTriplets):
+    def namingTriplets(self, SortedTriplets):
         """
         Name each triplet
 
@@ -575,17 +575,17 @@ class XBWT(object):
             False if all assigned names are different, true otherwise.
         """
         notUnique = False
-        lexName = []
-        lexName.append([2, SortedTriplets[0][0]])
+        LexName = []
+        LexName.append([2, SortedTriplets[0][0]])
         for i in range(1, len(SortedTriplets)):
             if SortedTriplets[i-1][1]==SortedTriplets[i][1]:
                 notUnique = True
-                lexName.append([lexName[i-1][0], SortedTriplets[i][0]])
+                LexName.append([LexName[i-1][0], SortedTriplets[i][0]])
             else:
-                lexName.append([lexName[i-1][0]+1, SortedTriplets[i][0]])
-        return lexName, notUnique
+                LexName.append([LexName[i-1][0]+1, SortedTriplets[i][0]])
+        return LexName, notUnique
     
-    def contractedTree(self, IntNodes, j, lexName, firstIteration):
+    def contractTree(self, IntNodes, j, lexName, firstIteration):
         """
         Create the contracted tree for the recursive step of the 
         pathSort algorithm 
@@ -629,7 +629,7 @@ class XBWT(object):
         dictNext[0]=1
         dictNext[1]=2
         dictNext[2]=0
-        links = []
+        Edges = []
         # Reconstruction of the various edges starting from the last element of IntNodes
         if j == 0:
             for i in range(len(IntNodesTemp)-1, -1, -1):
@@ -637,25 +637,25 @@ class XBWT(object):
                     if IntNodesTemp[i][1]%3 == dictNext[j]:
                         # If the parent is the root
                         if IntNodesTemp[i][2]==1:
-                            links.append([IntNodesTemp[IntNodesTemp[i][2]-1][0], IntNodesTemp[i][0]])
+                            Edges.append([IntNodesTemp[IntNodesTemp[i][2]-1][0], IntNodesTemp[i][0]])
                         else:
                             aux = IntNodesTemp[IntNodesTemp[IntNodesTemp[i][2]-1][2]-1][0]
-                            links.append([aux, IntNodesTemp[i][0]])
+                            Edges.append([aux, IntNodesTemp[i][0]])
                     else:
-                        links.append([IntNodesTemp[IntNodesTemp[i][2]-1][0], IntNodesTemp[i][0]])
+                        Edges.append([IntNodesTemp[IntNodesTemp[i][2]-1][0], IntNodesTemp[i][0]])
         else:
              for i in range(len(IntNodesTemp)-1, 0, -1):
                 if IntNodesTemp[i][1]%3!=j:
                     if IntNodesTemp[i][1]%3 == dictNext[j]:
                         aux = IntNodesTemp[IntNodesTemp[IntNodesTemp[i][2]-1][2]-1][0]
-                        links.append([aux, IntNodesTemp[i][0]])
+                        Edges.append([aux, IntNodesTemp[i][0]])
                     else:
-                        links.append([IntNodesTemp[IntNodesTemp[i][2]-1][0], IntNodesTemp[i][0]])
+                        Edges.append([IntNodesTemp[IntNodesTemp[i][2]-1][0], IntNodesTemp[i][0]])
         
         tree=Tree()
         tree.insert(IntNodesTemp[0][0], None)
-        for i in range(len(links)-1, -1, -1):
-            tree.insert(links[i][1], links[i][0])
+        for i in range(len(Edges)-1, -1, -1):
+            tree.insert(Edges[i][1], Edges[i][0])
         
         return tree
         
@@ -803,7 +803,7 @@ class XBWT(object):
             The array of IntNodes ordered positions.
         """
                 
-        IntNodes = self.computeIntNodeAPosFirstSortrray(T.getRoot())
+        IntNodes = self.computeIntNodesArray(T.getRoot())
                                 
         # Number of nodes at level j = 0, 1, 2 mod 3
         NNL = np.zeros(3, dtype="int")
@@ -865,27 +865,23 @@ class XBWT(object):
             TripletContainer.append(Triple)
             Triplets.append(TripletContainer)
         
-        Arr = []
-        for i in range(len(Triplets)):
-            Arr.append(list((i, Triplets[i])))
-        
         if firstIteration:
             SortedTriplets = self.radixSortLSD(Triplets, 3)
         else:
             SortedTriplets = self.radixSortInteger([[e[0], int(''.join(e[1]))] for e in Triplets])
         
-        LexName, notUnique = self.nameTriplets(SortedTriplets)
+        LexName, notUnique = self.namingTriplets(SortedTriplets)
                 
         maxName = LexName[len(LexName)-1][0]
         
         APosFirstSort = np.zeros(len(Triplets), dtype="int")
         if notUnique:
-            contractTree = self.contractedTree(copy.deepcopy(IntNodes), j, LexName, firstIteration)
+            cTree = self.contractTree(copy.deepcopy(IntNodes), j, LexName, firstIteration)
             rem+=1
             if j!=0:
-                APosFirstSort = self.pathSort(contractTree, False, False, rem, maxName) # prima era true
+                APosFirstSort = self.pathSort(cTree, False, False, rem, maxName) # prima era true
             else: 
-                APosFirstSort = self.pathSort(contractTree, True, False, rem, maxName)
+                APosFirstSort = self.pathSort(cTree, True, False, rem, maxName)
         else:
             for i in range(len(SortedTriplets)):
                 APosFirstSort[i] = PosFirst.index(SortedTriplets[i][0]) # rivedere visto la modifica precedente
@@ -894,7 +890,6 @@ class XBWT(object):
             for i in range(len(APosFirstSort)):
                 APosFirstSort[i]-=1
         
-        
         # Compute PosFirstSort
         PosFirstSort = []
         for i in range(len(APosFirstSort)):
@@ -902,34 +897,34 @@ class XBWT(object):
         
         # Compute PosSecondSort
         PosSecondSort = np.zeros(len(PosSecond), dtype="int")
-        pairs = []
+        Pairs = []
         c = 0
         
         if not firstIteration:
             if j == 0:
-                pairs.append((IntNodesTemp[PosSecond[0]+inc][0], 0, PosSecond[0]))
+                Pairs.append((IntNodesTemp[PosSecond[0]+inc][0], 0, PosSecond[0]))
                 c = 1
             for i in range(c, len(PosSecond)):
-                pairs.append((IntNodesTemp[PosSecond[i]+inc][0], 
+                Pairs.append((IntNodesTemp[PosSecond[i]+inc][0], 
                              PosFirstSort.index(IntNodesTemp[PosSecond[i]+inc][2]-inc), PosSecond[i]))
         else:
             if j==0:
-                pairs.append((IntNodesTemp[IntNodesTemp[PosSecond[0]+inc][2]][0], 
+                Pairs.append((IntNodesTemp[IntNodesTemp[PosSecond[0]+inc][2]][0], 
                           0, PosSecond[0]))
                 c = 1
             for i in range(c, len(PosSecond)):
-                pairs.append((IntNodesTemp[IntNodesTemp[PosSecond[i]+inc][2]][0], 
+                Pairs.append((IntNodesTemp[IntNodesTemp[PosSecond[i]+inc][2]][0], 
                          PosFirstSort.index(IntNodesTemp[PosSecond[i]+inc][2]-inc), PosSecond[i]))
         
-        sortedPairs = copy.deepcopy(pairs)
+        SortedPairs = copy.deepcopy(Pairs)
         # I sort by the first element, otherwise by the second
         if firstIteration:
-            sortedPairs.sort(key=lambda x:(x[0], int(x[1])))
+            SortedPairs.sort(key=lambda x:(x[0], int(x[1])))
         else:
-            sortedPairs.sort(key=lambda x:(int(x[0]), int(x[1])))
+            SortedPairs.sort(key=lambda x:(int(x[0]), int(x[1])))
 
-        for i in range(len(sortedPairs)):
-            PosSecondSort[i] = sortedPairs[i][2]
+        for i in range(len(SortedPairs)):
+            PosSecondSort[i] = SortedPairs[i][2]
         
         if not firstIteration:
             return self.merge(inc, PosFirstSort, PosSecondSort, IntNodesTemp, j, dummyRoot, firstIteration)
