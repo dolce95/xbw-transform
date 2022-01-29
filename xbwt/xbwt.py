@@ -430,7 +430,7 @@ class XBWT(object):
             flag = 0
             # Case 1: if the initial element of the pile is a leaf I remove
             # this item from the Stack
-            if len((Stack[len(Stack)-1]).children)== 0:
+            if len((Stack[len(Stack)-1]).getChildren())== 0:
                 Stack.pop()
                 level-=1
                 # Case 2: If the starting element of the stack is a node with
@@ -713,8 +713,8 @@ class XBWT(object):
                     pair1 = [int(IN[PosFirstSort[i]+sV][0])]
                     pair2 = [int(IN[PosSecondSort[j]+sV][0])]
                 if pair2[0] == pair1[0]:
-                    if pair2[1] == pair1[1]:
-                        if PosFirstSort.index(IN[IN[IN[PosSecondSort[j]+sV][2]][2]][2]-sV) > PosFirstSort.index(IN[IN[IN[PosFirstSort[i]+sV][2]][2]][2]-sV):
+                    if len(pair1) == 1 or pair2[1] == pair1[1]:
+                        if PosFirstSort.index(IN[PosSecondSort[j]+sV][2]-sV) > PosFirstSort.index(PosFirstSort[i]):
                             Merge.append(PosFirstSort[i])
                             i+=1
                         else:
